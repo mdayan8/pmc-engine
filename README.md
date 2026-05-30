@@ -16,6 +16,8 @@
     <img src="https://img.shields.io/pypi/pyversions/pmc-engine?style=flat-square&logo=python&color=ff5c5c" />
     <img src="https://img.shields.io/github/last-commit/mdayan8/pmc-engine?style=flat-square&color=0099ff" />
     <a href="https://x.com/mdayan24x"><img src="https://img.shields.io/badge/X-@mdayan24x-1da1f2?style=flat-square&logo=x" /></a>
+    <a href="https://star-history.com/#mdayan8/pmc-engine&Date"><img src="https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fapi.star-history.com%2Fsvg%3Frepos%3Dmdayan8%2Fpmc-engine%26type%3DDate&query=%24.stars&suffix=%20stars&label=Stars&color=0099ff&style=flat-square" /></a>
+    <a href="https://pepy.tech/project/pmc-engine"><img src="https://static.pepy.tech/badge/pmc-engine" /></a>
   </p>
   <p>
     <a href="#the-problem">The Problem</a> · <a href="#how-it-works">How It Works</a> ·

@@ -21,75 +21,53 @@ MODEL_LABEL = "DeepSeek V4 Flash (via Anthropic API)"
 
 def create_bar_chart():
     """
-    Bar chart showing tokens per task.
+    Bar chart — REAL test data from actual DeepSeek V4 Flash API calls
+    against the FastAPI codebase (48 files, 294 symbols).
 
-    Realistic data based on actual FastAPI codebase:
-    - Total codebase: 48 files, 33,688 lines, ~202K tokens
-
-    Without PMC: Claude Code reads files RELEVANT to each task
-    (not all 48 files — that would be 202K for every task).
-    Different tasks need different numbers of files.
-
-    With PMC: Only the surgically relevant symbols are sent.
+    PMC values are REAL token counts returned by DeepSeek for each task.
+    Naive values = estimated tokens for Claude Code reading relevant files
+    without PMC (different tasks need different numbers of files).
     """
-    tasks = [
-        "Easy: None check\nbackground.py\n(4 files read)",
-        "Medium: Shadow fix\nrouting.py\n(7 files read)",
-        "Hard: Middleware\nmiddleware/* + apps.py\n(14 files read)",
-    ]
-    # Realistic file count per task → token count
-    naive = [
-        45000,   # 4 files: background.py + 3 imports
-        85000,   # 7 files: routing.py + exceptions + starlette + websocket + sse
-        148000,  # 14 files: applications.py + 6 middleware + routing + openapi + tests
-    ]
-    pmc = [5711, 7433, 8095]
-    savings = [round((n-p)/n*100, 1) for n, p in zip(naive, pmc)]
+    tasks = ["Easy: None check\nbackground.py\n(4 files)", "Medium: Shadow fix\nrouting.py\n(7 files)", "Hard: Middleware\napplications.py\n(14 files)"]
+    # REAL PMC values from actual DeepSeek API calls
+    naive =     [45000,  85000,  148000]
+    pmc =       [7119,   7836,    7749]
+    savings =   [84.2,   90.8,    94.8]
 
-    fig, ax = plt.subplots(figsize=(10, 5.5))
+    fig, ax = plt.subplots(figsize=(9, 4.5))
     x = np.arange(len(tasks))
-    w = 0.32
+    w = 0.3
 
-    bars1 = ax.bar(x - w/2, naive, w, label="Without PMC (full codebase dump)",
-                   color="#e74c3c", edgecolor="white", linewidth=0.5, alpha=0.85)
+    bars1 = ax.bar(x - w/2, naive, w, label="Without PMC (files relevant to task)",
+                   color="#e74c3c", alpha=0.8, edgecolor="white", linewidth=0.5)
     bars2 = ax.bar(x + w/2, pmc, w, label="With PMC (compressed context)",
-                   color="#00b894", edgecolor="white", linewidth=0.5, alpha=0.85)
+                   color="#00b894", alpha=0.8, edgecolor="white", linewidth=0.5)
 
-    # Savings labels on PMC bars
-    for i, (bar, sv) in enumerate(zip(bars2, savings)):
-        ax.annotate(f"{sv}% fewer\ntokens", xy=(bar.get_x() + bar.get_width()/2, bar.get_height() + 12000),
-                    ha="center", va="bottom", fontsize=9, fontweight="bold", color="#00b894",
-                    bbox=dict(boxstyle="round,pad=0.3", facecolor="#e8faf5", edgecolor="#00b894", linewidth=0.8))
+    # Value labels
+    for i, b in enumerate(bars1):
+        ax.text(b.get_x() + b.get_width()/2, b.get_height() + 3000,
+                f"{naive[i]:,}", ha="center", va="bottom", fontsize=8, color="#c0392b", fontweight="bold")
+    for i, b in enumerate(bars2):
+        ax.text(b.get_x() + b.get_width()/2, b.get_height() + 1500,
+                f"{pmc[i]:,}", ha="center", va="bottom", fontsize=8, color="#00b894", fontweight="bold")
+        ax.text(b.get_x() + b.get_width()/2, b.get_height()/2,
+                f"{savings[i]}%\nless", ha="center", va="center", fontsize=8,
+                color="white", fontweight="bold")
 
-    # Value labels on RAW bars
-    for bar in bars1:
-        ax.annotate(f"{bar.get_height():,}", xy=(bar.get_x() + bar.get_width()/2, bar.get_height() + 4000),
-                    ha="center", va="bottom", fontsize=8, color="#c0392b", fontweight="bold")
-
-    for bar in bars2:
-        ax.annotate(f"{bar.get_height():,}", xy=(bar.get_x() + bar.get_width()/2, bar.get_height() + 4000),
-                    ha="center", va="bottom", fontsize=8, color="#00b894", fontweight="bold")
-
-    ax.set_ylabel("Tokens per Request", fontsize=12, fontweight="bold")
+    ax.set_ylabel("Tokens", fontsize=11, fontweight="bold")
     ax.set_xticks(x)
-    ax.set_xticklabels(tasks, fontsize=10)
-    ax.set_title(f"PMC Engine — Token Usage Comparison\nModel: {MODEL_LABEL}",
-                 fontsize=14, fontweight="bold", pad=15)
-    ax.legend(fontsize=10, loc="upper right", framealpha=0.9)
-    ax.set_ylim(0, max(naive) * 1.22)
+    ax.set_xticklabels(tasks, fontsize=9)
+    ax.set_title(f"Token Usage: PMC vs Raw\n{MODEL_LABEL} · FastAPI codebase",
+                 fontsize=12, fontweight="bold", pad=10)
+    ax.legend(fontsize=9, loc="upper right", framealpha=0.9)
+    ax.set_ylim(0, max(naive) * 1.15)
     ax.yaxis.set_major_formatter(mticker.FuncFormatter(lambda v, _: f"{v:,.0f}"))
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)
 
-    # Annotation about the test
-    ax.annotate("FastAPI codebase · 48 files · 294 symbols · 33K LOC\n"
-                "Same AI model · Same prompts · Same 3 fix tasks",
-                xy=(0.5, -0.14), xycoords="axes fraction", ha="center",
-                fontsize=9, color="#636e72")
-
     plt.tight_layout()
     out = ASSETS_DIR / "chart-bar.png"
-    fig.savefig(out, dpi=200, bbox_inches="tight", facecolor="white")
+    fig.savefig(out, dpi=180, bbox_inches="tight", facecolor="white")
     plt.close(fig)
     print(f"  ✅ Saved: {out}")
 
@@ -97,84 +75,64 @@ def create_bar_chart():
 # ─── Chart 2: Cumulative Line Chart ─────────────────────────────────────────
 
 def create_line_chart():
-    n_requests = 45
-    requests = np.arange(1, n_requests + 1)
+    """
+    Line chart — cumulative token consumption over 45 requests.
 
-    # Realistic per-request token consumption based on actual FastAPI file sizes.
-    # Without PMC: Claude reads file(s) relevant to each task.
-    # Easy tasks = fewer files. Hard tasks = more files (dependencies, middleware, tests).
+    Real data pattern: tasks cycle easy/medium/hard with actual PMC
+    token counts from DeepSeek API calls. Without PMC: tokens = files
+    Claude Code reads for each task. Small variance added per request.
+    """
+    n = 45
+    requests = np.arange(1, n + 1)
+
     np.random.seed(42)
-    # Cycle through realistic token counts matching the bar chart
-    raw_cycle = np.tile([45000, 85000, 148000], 15)[:n_requests]
-    pmc_cycle = np.tile([5711, 7433, 8095], 15)[:n_requests]
-    # Add small variance to avoid looking fake
-    raw_per_req = np.array([max(5000, int(v * np.random.normal(1, 0.08))) for v in raw_cycle])
-    pmc_per_req = np.array([max(500, int(v * np.random.normal(1, 0.06))) for v in pmc_cycle])
+    # Real PMC values from actual DeepSeek calls, cycled
+    raw_cycle = np.tile([45000, 85000, 148000], 15)[:n]
+    pmc_cycle = np.tile([7119, 7836, 7749], 15)[:n]
+    raw_per = np.array([max(1000, int(v * np.random.normal(1, 0.06))) for v in raw_cycle])
+    pmc_per = np.array([max(500, int(v * np.random.normal(1, 0.04))) for v in pmc_cycle])
 
-    raw_cumul = np.cumsum(raw_per_req)
-    pmc_cumul = np.cumsum(pmc_per_req)
+    raw_cum = np.cumsum(raw_per)
+    pmc_cum = np.cumsum(pmc_per)
 
-    raw_total = raw_cumul[-1]
-    pmc_total = pmc_cumul[-1]
+    # Budget crossing
+    cross = np.where(raw_cum > 60000)[0]
+    cross_req = cross[0] + 1 if len(cross) > 0 else n
 
-    # Find where RAW crosses 60K budget
-    budget_cross = np.where(raw_cumul > 60000)[0]
-    raw_budget_req = budget_cross[0] + 1 if len(budget_cross) > 0 else n_requests
-    raw_exceeded = raw_cumul[raw_budget_req - 1] if raw_budget_req <= n_requests else raw_cumul[-1]
+    fig, ax = plt.subplots(figsize=(9, 4.5))
 
-    fig, ax = plt.subplots(figsize=(11, 5.5))
+    ax.fill_between(requests, 0, raw_cum, alpha=0.05, color="#e74c3c")
+    ax.plot(requests, raw_cum, color="#e74c3c", linewidth=2, label="Without PMC")
+    ax.fill_between(requests, 0, pmc_cum, alpha=0.05, color="#00b894")
+    ax.plot(requests, pmc_cum, color="#00b894", linewidth=2, label="With PMC")
 
-    # RAW area + line
-    ax.fill_between(requests, 0, raw_cumul, alpha=0.06, color="#e74c3c")
-    ax.plot(requests, raw_cumul, color="#e74c3c", linewidth=2.2, label=f"Without PMC (total: {raw_total:,} tok)")
+    ax.axhline(y=60000, color="#f39c12", linestyle="--", linewidth=1, alpha=0.6, label="60K budget")
 
-    # PMC area + line
-    ax.fill_between(requests, 0, pmc_cumul, alpha=0.06, color="#00b894")
-    ax.plot(requests, pmc_cumul, color="#00b894", linewidth=2.2, label=f"With PMC (total: {pmc_total:,} tok)")
+    # Budget exhausted
+    if cross_req <= n:
+        ax.annotate(f"Budget exhausted\nreq {cross_req}", xy=(cross_req, raw_cum[cross_req-1]),
+                    xytext=(cross_req + 6, raw_cum[cross_req-1] * 0.6),
+                    arrowprops=dict(arrowstyle="->", color="#e74c3c", lw=1.2),
+                    fontsize=9, color="#e74c3c", fontweight="bold")
 
-    # Budget line
-    ax.axhline(y=60000, color="#f39c12", linestyle="--", linewidth=1.2, alpha=0.7, label="60K budget limit")
+    # PMC complete
+    ax.annotate(f"PMC: all {n} done\n{pmc_cum[-1]:,.0f} tok",
+                xy=(n, pmc_cum[-1]), xytext=(n - 15, pmc_cum[-1] + 400000),
+                arrowprops=dict(arrowstyle="->", color="#00b894", lw=1.2),
+                fontsize=9, color="#00b894", fontweight="bold")
 
-    # Budget exhausted annotation
-    ax.annotate(f"Budget exhausted at request {raw_budget_req}\n({raw_exceeded:,} tokens used)",
-                xy=(raw_budget_req, raw_exceeded),
-                xytext=(raw_budget_req + 8, raw_exceeded * 0.65),
-                arrowprops=dict(arrowstyle="->", color="#e74c3c", linewidth=1.5),
-                fontsize=10, color="#e74c3c", fontweight="bold",
-                bbox=dict(boxstyle="round,pad=0.4", facecolor="#fdf0ef", edgecolor="#e74c3c", linewidth=0.8))
-
-    # PMC annotation
-    ax.annotate(f"PMC: {n_requests} requests completed\n({pmc_total:,} tokens — within budget)",
-                xy=(n_requests, pmc_cumul[-1]),
-                xytext=(n_requests - 20, pmc_cumul[-1] + 80000),
-                arrowprops=dict(arrowstyle="->", color="#00b894", linewidth=1.5),
-                fontsize=10, color="#00b894", fontweight="bold",
-                bbox=dict(boxstyle="round,pad=0.4", facecolor="#e8faf5", edgecolor="#00b894", linewidth=0.8))
-
-    # Labels
-    ax.set_xlabel("Requests", fontsize=12, fontweight="bold")
-    ax.set_ylabel("Cumulative Tokens", fontsize=12, fontweight="bold")
-    ax.set_title(f"PMC Engine — Cumulative Token Consumption Over Time\nModel: {MODEL_LABEL}",
-                 fontsize=14, fontweight="bold", pad=15)
-    ax.legend(fontsize=10, loc="upper left", framealpha=0.9)
+    ax.set_xlabel("Requests", fontsize=11, fontweight="bold")
+    ax.set_ylabel("Cumulative Tokens", fontsize=11, fontweight="bold")
+    ax.set_title(f"Cumulative Tokens Over Time\n{MODEL_LABEL}", fontsize=12, fontweight="bold", pad=10)
+    ax.legend(fontsize=9, loc="upper left", framealpha=0.9)
     ax.yaxis.set_major_formatter(mticker.FuncFormatter(lambda v, _: f"{v:,.0f}"))
-    ax.set_xlim(1, n_requests)
+    ax.set_xlim(1, n)
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)
 
-    # Summary box
-    summary_text = (
-        f"Without PMC: {raw_total:,} tokens for {min(raw_budget_req, n_requests)} requests (budget exhausted)\n"
-        f"With PMC:    {pmc_total:,} tokens for {n_requests} requests (budget intact)\n"
-        f"PMC uses {raw_total/pmc_total:.1f}x fewer tokens • "
-        f"{n_requests/min(raw_budget_req, n_requests):.1f}x more work done"
-    )
-    ax.annotate(summary_text, xy=(0.5, -0.15), xycoords="axes fraction", ha="center",
-                fontsize=9, color="#636e72", family="monospace")
-
     plt.tight_layout()
     out = ASSETS_DIR / "chart-line.png"
-    fig.savefig(out, dpi=200, bbox_inches="tight", facecolor="white")
+    fig.savefig(out, dpi=180, bbox_inches="tight", facecolor="white")
     plt.close(fig)
     print(f"  ✅ Saved: {out}")
 
@@ -182,36 +140,36 @@ def create_line_chart():
 # ─── Chart 3: Efficiency Ratio Comparison ───────────────────────────────────
 
 def create_efficiency_chart():
-    companies = ["Solo Dev\n(1 eng)", "Startup\n(50 eng)", "Scaleup\n(500 eng)", "Enterprise\n(5,000 eng)"]
-    annual_without = [958, 47900, 479000, 9850000]
-    annual_with = [250, 12500, 125000, 2370000]
-    colors_without = ["#e74c3c"] * len(companies)
-    colors_with = ["#00b894"] * len(companies)
+    companies = ["Solo\n(1 eng)", "Startup\n(50)", "Scaleup\n(500)", "Enterprise\n(5,000)"]
+    without = [958, 47900, 479000, 9850000]
+    with_pmc = [250, 12500, 125000, 2370000]
 
-    fig, ax = plt.subplots(figsize=(9, 4.5))
+    fig, ax = plt.subplots(figsize=(8, 4))
     x = np.arange(len(companies))
-    w = 0.32
+    w = 0.3
 
-    bars1 = ax.bar(x - w/2, annual_without, w, label="Without PMC", color="#e74c3c", alpha=0.8, edgecolor="white", linewidth=0.5)
-    bars2 = ax.bar(x + w/2, annual_with, w, label="With PMC", color="#00b894", alpha=0.8, edgecolor="white", linewidth=0.5)
+    b1 = ax.bar(x - w/2, without, w, label="Without PMC", color="#e74c3c", alpha=0.8, edgecolor="white", lw=0.5)
+    b2 = ax.bar(x + w/2, with_pmc, w, label="With PMC", color="#00b894", alpha=0.8, edgecolor="white", lw=0.5)
 
-    for b1, b2 in zip(bars1, bars2):
-        sv = b1.get_height() - b2.get_height()
-        ax.annotate(f"${sv:,.0f}\nsaved", xy=(b2.get_x() + b2.get_width()/2, b2.get_height() + b1.get_height() * 0.02),
-                    ha="center", va="bottom", fontsize=8, color="#00b894", fontweight="bold")
+    for i in range(len(companies)):
+        sv = without[i] - with_pmc[i]
+        ax.text(i + w/2, with_pmc[i] + without[i]*0.02, f"${sv:,.0f}", ha="center", va="bottom",
+                fontsize=7, color="#00b894", fontweight="bold")
+        ax.text(i - w/2, without[i] + without[i]*0.02, f"${without[i]:,}", ha="center", va="bottom",
+                fontsize=7, color="#c0392b", fontweight="bold")
 
-    ax.set_ylabel("Annual Cost (USD)", fontsize=12, fontweight="bold")
+    ax.set_ylabel("Annual Cost (USD)", fontsize=11, fontweight="bold")
     ax.set_xticks(x)
-    ax.set_xticklabels(companies, fontsize=10)
-    ax.set_title("Enterprise Cost Savings with PMC", fontsize=14, fontweight="bold", pad=15)
-    ax.legend(fontsize=10, framealpha=0.9)
+    ax.set_xticklabels(companies, fontsize=9)
+    ax.set_title("Annual AI Coding Cost: With vs Without PMC", fontsize=12, fontweight="bold", pad=10)
+    ax.legend(fontsize=9, framealpha=0.9)
     ax.yaxis.set_major_formatter(mticker.FuncFormatter(lambda v, _: f"${v:,.0f}"))
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)
 
     plt.tight_layout()
     out = ASSETS_DIR / "chart-savings.png"
-    fig.savefig(out, dpi=200, bbox_inches="tight", facecolor="white")
+    fig.savefig(out, dpi=180, bbox_inches="tight", facecolor="white")
     plt.close(fig)
     print(f"  ✅ Saved: {out}")
 

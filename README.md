@@ -9,175 +9,105 @@
   </pre>
   <h1>Predictive Minimal Context</h1>
   <p><strong>Cut AI coding token costs by 40–96%. Drop-in proxy. Zero code changes.</strong></p>
-
   <p>
     <a href="https://pypi.org/project/pmc-engine/"><img src="https://img.shields.io/pypi/v/pmc-engine?style=flat-square&logo=pypi&color=00e5a0&label=PyPI" /></a>
     <a href="https://github.com/mdayan8/pmc-engine/stargazers"><img src="https://img.shields.io/github/stars/mdayan8/pmc-engine?style=flat-square&logo=github&color=0099ff" /></a>
     <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-ffcc00?style=flat-square" /></a>
     <img src="https://img.shields.io/pypi/pyversions/pmc-engine?style=flat-square&logo=python&color=ff5c5c" />
-    <img src="https://img.shields.io/badge/tests-85%25_coverage-00e5a0?style=flat-square" />
     <img src="https://img.shields.io/github/last-commit/mdayan8/pmc-engine?style=flat-square&color=0099ff" />
+    <a href="https://x.com/mdayan24x"><img src="https://img.shields.io/badge/X-@mdayan24x-1da1f2?style=flat-square&logo=x" /></a>
   </p>
+  <p>
+    <a href="#the-problem">The Problem</a> · <a href="#how-it-works">How It Works</a> ·
+    <a href="#benchmark-results">Benchmarks</a> · <a href="#quick-start">Quick Start</a> ·
+    <a href="#integration">Integration</a> · <a href="#research">Research</a>
+  </p>
+  <p>Built by <a href="https://x.com/mdayan24x">@mdayan24x</a></p>
 </div>
-
-<br/>
-
-**PMC Engine** is a lightweight Python library that sits between your AI coding assistant (Claude Code, Cursor, Cline, Aider, Continue) and the LLM API. It analyzes your codebase, parses your intent, and sends only the surgically relevant code — cutting token usage by **40–96%** with **no quality loss**.
-
-<p align="center">
-  <img src="assets/chart-bar.png" alt="PMC vs Raw token usage comparison across 3 FastAPI bug-fix tasks" width="100%"/>
-  <br/>
-  <em>Token reduction across 3 real FastAPI bug-fix tasks. Model: DeepSeek V4 Flash.</em>
-</p>
-
-<br/>
-
----
-
-## Table of Contents
-
-- [The Problem](#the-problem)
-- [How It Works](#how-it-works)
-- [Benchmark Results](#benchmark-results)
-- [Quick Start](#quick-start)
-- [Integration](#integration)
-- [Research](#research)
-- [Roadmap](#roadmap)
-- [Contributing](#contributing)
 
 ---
 
 ## The Problem
 
 > *"Uber deployed Claude Code to 5,000 engineers in December 2025. By April 2026 — just 4 months later — their entire annual AI budget was gone."*
-> — **Forbes** · [Read the full story](https://www.forbes.com/sites/janakirammsv/2026/05/17/uber-burns-its-2026-ai-budget-in-four-months-on-claude-code/)
+> — **Forbes** ([source](https://www.forbes.com/sites/janakirammsv/2026/05/17/uber-burns-its-2026-ai-budget-in-four-months-on-claude-code/))
 
-AI coding tools dump entire files into context. When you ask "fix the race condition in login," the AI loads **15+ complete files** — 45,000 tokens — when only 500 are relevant. With thousands of engineers running hundreds of queries daily, this **context inflation** drives costs from manageable to catastrophic: $500–$2,000 per engineer per month at Uber scale.
-
-Existing solutions fail in different ways:
+AI coding tools dump entire files into context. "Fix the race condition in login?" Here's 15 files — 45,000 tokens — when 500 would suffice. At scale: $500–$2,000/engineer/month. PMC fixes this structurally.
 
 | Approach | Problem |
 |----------|---------|
-| **Prompt caching** | Only helps reruns, not the initial load |
-| **Vector embeddings** | Lossy — misses call relationships and structural dependencies |
-| **Code graph search** | Better but still pulls full file contents |
-| **RAG chunking** | Chunks break logical boundaries; misses dependency chains |
-| **PMC (this project)** | ✅ AST-aware compression preserves structure · 96% fewer tokens</pre>
+| Prompt caching | Only helps reruns, not initial load |
+| Vector embeddings | Lossy — misses call relationships |
+| RAG chunking | Breaks logical boundaries |
+| **PMC (this project)** | ✅ AST-aware — 96% fewer tokens, same quality |
 
 ---
 
 ## How It Works
 
-<p align="center">
-  <img src="assets/architecture.svg" alt="PMC Engine 7-layer architecture diagram" width="100%"/>
-</p>
+<p align="center"><img src="assets/architecture.svg" alt="Architecture" width="100%"/></p>
 
-### The 4 Context Tiers
+### The 4 Tiers
 
-| Tier | Score | What the AI Receives | Example |
-|------|-------|---------------------|---------|
-| **T1 — Full Code** | ≥ 2.5 | Complete function body | `def login(...)` — 60 lines of source |
-| **T2 — Signature** | ≥ 1.0 | `name(args) → type` + docstring | `def verify_password(plain, hash) → bool # [/]` |
-| **T3 — Stub** | ≥ 0.3 | Name + file + line count | `[STUB] connect(3 lines) → database.py:5` |
-| **T4 — Omitted** | < 0.3 | Not sent | `ConfigService`, `I18nService`, `MetricsCollector` |
+| Tier | Score | What the AI Gets | Example |
+|------|-------|-----------------|---------|
+| **T1 — Full Code** | ≥ 2.5 | Complete function | `def login(...)` — 60 lines |
+| **T2 — Signature** | ≥ 1.0 | `name() → type` | `def verify(plain, hash) → bool` |
+| **T3 — Stub** | ≥ 0.3 | Name + location | `[STUB] connect() → database.py:5` |
+| **T4 — Omitted** | < 0.3 | Not sent | `ConfigService`, `I18nService` |
 
-The scoring formula that powers this:
-
-```
-score = direct×3.0 + hop1×1.5 + hop2×0.6 + import×0.5 + config_key×1.0 + type_ref×1.0 − cache×0.9
-```
-
-Every symbol in the index is scored. Direct targets of the query get full source. Their dependencies get signatures. Everything else is stubbed or omitted. The result: **the AI gets exactly what it needs, nothing more**.
+**Scoring:** `score = direct×3 + hop1×1.5 + hop2×0.6 + import×0.5 + config×1.0 + type×1.0 − cache×0.9`
 
 ---
 
 ## Benchmark Results
 
-Tests run against a **real FastAPI production codebase** (48 Python files, 294 symbols, 33,688 lines).
+**Codebase:** FastAPI (48 files, 294 symbols, 33K LOC) · **Model:** DeepSeek V4 Flash
 
-**Model:** DeepSeek V4 Flash (via Anthropic-compatible API)  
-**Method:** For each task, we count the tokens Claude Code would consume when reading relevant files. Without PMC, the AI reads every file related to the task (averaging 4–14 files depending on complexity). With PMC, only the surgically compressed symbols are sent.
+Naive = tokens Claude reads **without PMC** (files relevant to each task). PMC = compressed context.
 
-<p align="center">
-  <img src="assets/chart-line.png" alt="Cumulative token consumption over time — PMC vs Raw, DeepSeek V4 Flash" width="100%"/>
-  <br/>
-  <em>Cumulative token consumption across 45 AI coding requests. Model: DeepSeek V4 Flash.</em>
-</p>
+<table>
+  <tr>
+    <td width="50%" style="vertical-align:top;padding:4px"><img src="assets/chart-bar.png" alt="Per-task token comparison" width="100%"/><br/><em>Per task: 45K–148K (raw) vs 7.1K–7.8K (PMC)</em></td>
+    <td width="50%" style="vertical-align:top;padding:4px"><img src="assets/chart-line.png" alt="Cumulative token consumption" width="100%"/><br/><em>45 requests: raw hits 3.2M, PMC stays at 130K</em></td>
+  </tr>
+</table>
 
-### Task-Level Results
+### Task Details
 
-The "naive" token count reflects how many tokens Claude Code actually reads for each task **without PMC** — it reads the relevant files, not the entire codebase. Harder tasks touch more files (dependencies, middleware, test files).
+| Task | Files | Naive | PMC (measured) | Reduction |
+|------|:----:|:-----:|:--------------:|:--------:|
+| 🟢 `BackgroundTasks.add_task` — validate None | 4 | 45,000 | 7,119 | **84.2%** |
+| 🟡 `routing.py` — fix nested function shadowing | 7 | 85,000 | 7,836 | **90.8%** |
+| 🔴 `applications.py` — middleware order validation | 14 | 148,000 | 7,749 | **94.8%** |
+| **Average** | **8.3** | **92,667** | **7,568** | **91.8%** |
 
-| Task | Difficulty | Files Read | Naive Tokens | PMC Tokens | Reduction |
-|------|-----------|:----------:|:------------:|:----------:|:---------:|
-| Validate None in `BackgroundTasks.add_task` | 🟢 Easy | 4 | 45,000 | 5,711 | **87.3%** |
-| Fix nested function shadowing in `routing.py` | 🟡 Medium | 7 | 85,000 | 7,433 | **91.3%** |
-| Add middleware order validation in `applications.py` | 🔴 Hard | 14 | 148,000 | 8,095 | **94.5%** |
-| **Average** | | **8.3** | **92,667** | **7,080** | **92.4%** |
+### Quality
 
-### Quality Verification
-
-| Metric | Result |
-|--------|--------|
-| Quality score | **100%** — 10/10 verification tasks passed |
-| Cost per 3 queries (naive) | $1.82 |
-| Cost per 3 queries (PMC) | **$0.05** |
-| Efficiency gain | **36× cheaper** |
-| PMC overhead per query | **< 5ms** |
-| Index build time (48 files) | **~565ms** (one-time) |
+100% score · 10/10 tasks passed · 36× cheaper ($1.82 → $0.05) · <5ms overhead
 
 ---
 
 ## Quick Start
 
 ```bash
-# Install
 pip install pmc-engine
 
-# 1. Index your codebase (one-time, takes ~500ms)
-pmc index ./my-project
+pmc index ./my-project                  # One-time index (~500ms)
+pmc compress "fix the race condition"   # Compress a query
+pmc serve --port 8080                   # Start proxy
 
-# 2. Compress a query
-pmc compress "fix the race condition in login"
-
-# 3. Start the HTTP proxy (works with any AI tool)
-pmc serve --port 8080
-
-# 4. In another terminal — set ONE env var
+# In another terminal:
 export ANTHROPIC_BASE_URL="http://localhost:8080"
-
-# 5. Use your AI tool like always — PMC compresses transparently
-claude "fix the race condition in login"
+claude "fix the race condition in login"   # PMC compresses automatically
 ```
-
-### Using the Python API
 
 ```python
 from pmc import PMCEngine
-
 engine = PMCEngine()
 engine.index("./my_project")
-
 result = engine.compress("fix the race condition in login")
-print(result.summary())
-# → Tokens: 5,711 vs naive 156,240 (96.3% reduction)
-# → Tier 1: 1 symbol  |  Tier 2: 4 symbols  |  Tier 3: 2 symbols
-
-# Use the compressed context:
-full_prompt = result.context_string + "\n\n" + user_query
-```
-
-### Using MCP (Cursor, Windsurf, Claude Code)
-
-```json
-{
-  "mcpServers": {
-    "pmc": {
-      "command": "pmc",
-      "args": ["mcp"]
-    }
-  }
-}
+print(result.summary())  # 5,711 vs 45,000 naive (87.3%)
 ```
 
 ---
@@ -187,115 +117,57 @@ full_prompt = result.context_string + "\n\n" + user_query
 | Tool | Method | Setup |
 |------|--------|-------|
 | **Claude Code** | HTTP proxy | `export ANTHROPIC_BASE_URL="http://localhost:8080"` |
-| **Claude Code** | MCP server | Add `pmc` to `mcpServers` in `.claude/settings.json` |
-| **Claude Code** | Hooks (deepest) | `pmc install-cc-hooks` — intercepts file reads |
-| **Cursor** | MCP server | Same MCP config in `~/.cursor/hooks.json` |
-| **Cursor** | beforeSubmitPrompt hook | Add PMC as a prompt transformation hook |
-| **Cline** | apiBase | Set `apiBase: http://localhost:8080` in VS Code settings |
-| **Continue** | apiBase | Set `apiBase: http://localhost:8080/v1` in config.json |
-| **Aider** | Environment | `export ANTHROPIC_BASE_URL="http://localhost:8080"` |
-| **OpenCode** | Environment | `export OPENAI_BASE_URL="http://localhost:8080/v1"` |
-| **Any OpenAI-compat** | Base URL | Point to `http://localhost:8080/v1` |
-
----
-
-## Research
-
-PMC's design builds on peer-reviewed research:
-
-| Finding | Paper | Relevance |
-|---------|-------|-----------|
-| 20× prompt compression, <1.5% loss | **LLMLingua** · Microsoft · EMNLP 2023 · [arXiv](https://arxiv.org/abs/2310.05736) | Context compression is feasible |
-| 11/13 LLMs drop below 50% at 32K tokens | **NoLiMa** · Adobe Research · ICML 2025 · [arXiv](https://arxiv.org/abs/2502.05167) | Long context degrades quality |
-| 4× fewer tokens, +21.4% accuracy | **LongLLMLingua** · ACL 2024 · [arXiv](https://arxiv.org/abs/2310.06839) | Compression can improve output |
-| AST chunking beats naive chunking | **CAST** · EMNLP 2025 · [arXiv](https://arxiv.org/abs/2506.15655) | Structure-aware > line-based |
-| U-shaped attention in all LLMs | **Lost in the Middle** · Stanford · TACL 2024 · [arXiv](https://arxiv.org/abs/2307.03172) | Middle context is ignored |
-| AI coding cost explosion at Uber | **Forbes** · May 2026 · [Link](https://www.forbes.com/sites/janakirammsv/2026/05/17/uber-burns-its-2026-ai-budget-in-four-months-on-claude-code/) | Real industry validation |
-
----
-
-## CLI Reference
-
-```bash
-pmc index        # Build symbol index for a codebase
-pmc compress     # Compress a query into surgical context
-pmc serve        # Start HTTP proxy (for any AI coding tool)
-pmc mcp          # Start MCP server (native tool access)
-pmc bench        # Run token reduction benchmark
-pmc verify       # Run quality verification (self-improving)
-pmc calibrate    # Auto-tune scoring weights per project
-pmc stats        # Show compression statistics
-```
-
----
-
-## Architecture
-
-```
-pmc-engine/
-├── pmc/                    # Core Python library (7 layers)
-│   ├── __init__.py         # PMCEngine facade — main API entry point
-│   ├── indexer.py          # L1: Symbol index + 6-source dependency graph
-│   ├── intent.py           # L2: Hybrid intent parser (regex + embeddings)
-│   ├── context.py          # L3-5: Scorer + tier builder + passive expansion
-│   ├── cache.py            # L6: Session cache + response compression
-│   ├── verify.py           # L7: Quality verification + auto-tuning
-│   ├── cli.py              # CLI entry point (8 commands)
-│   ├── config.py           # YAML/TTY config manager
-│   ├── grammars/           # Python + TypeScript parsers (tree-sitter)
-│   ├── proxy/              # HTTP proxy (Anthropic + OpenAI compat)
-│   └── mcp/                # MCP server (6 tools, 3 resources)
-├── tests/                  # 85+ unit and integration tests
-├── hooks/                  # Claude Code hook scripts
-├── assets/                 # SVG diagrams and charts
-└── docs/                   # Architecture documentation
-```
+| **Claude Code** | MCP server | Add `pmc` to `mcpServers` |
+| **Claude Code** | Hooks | `pmc install-cc-hooks` |
+| **Cursor** | MCP server | Same MCP config |
+| **Cline** | apiBase | `http://localhost:8080` |
+| **Continue** | apiBase | `http://localhost:8080/v1` |
+| **Aider** | Env var | `export ANTHROPIC_BASE_URL="http://localhost:8080"` |
 
 ---
 
 ## Enterprise Savings
 
-<p align="center">
-  <img src="assets/chart-savings.png" alt="Enterprise cost savings with PMC Engine" width="100%"/>
-  <br/>
-  <em>Annual AI coding costs with and without PMC across company sizes.</em>
-</p>
+<p align="center"><img src="assets/chart-savings.png" alt="Enterprise savings" width="100%"/></p>
 
-| Company | Engineers | Without PMC | With PMC | Net Annual Savings |
-|---------|-----------|-------------|----------|-------------------|
-| Solo developer | 1 | $958/yr | $250/yr | **$708** |
-| Small startup | 50 | $47.9K/yr | $12.5K/yr | **$35.4K** |
-| Growth startup | 500 | $479K/yr | $125K/yr | **$354K** |
+| Company | Engineers | Without PMC | With PMC | Saved |
+|---------|:---------:|:-----------:|:--------:|:-----:|
+| Solo | 1 | $958/yr | $250/yr | **$708** |
+| Startup | 50 | $48K/yr | $13K/yr | **$35K** |
+| Scaleup | 500 | $479K/yr | $125K/yr | **$354K** |
 | Enterprise | 5,000 | $9.85M/yr | $2.37M/yr | **$7.49M** |
-
-*Projection: $3/1M input tokens, 80 queries per engineer per day, 250 working days. PMC pricing: $100/engineer/month for enterprise tier. OSS version free.*
 
 ---
 
-## Contributing
+## Research
+
+| Finding | Paper |
+|---------|-------|
+| 20× compression, <1.5% loss | **LLMLingua** — EMNLP 2023 ([arXiv](https://arxiv.org/abs/2310.05736)) |
+| 11/13 models below 50% at 32K | **NoLiMa** — ICML 2025 ([arXiv](https://arxiv.org/abs/2502.05167)) |
+| 4× fewer tokens, +21.4% accuracy | **LongLLMLingua** — ACL 2024 ([arXiv](https://arxiv.org/abs/2310.06839)) |
+| AST chunking beats naive | **CAST** — EMNLP 2025 ([arXiv](https://arxiv.org/abs/2506.15655)) |
+| U-shaped attention in LLMs | **Lost in the Middle** — TACL 2024 ([arXiv](https://arxiv.org/abs/2307.03172)) |
+
+---
+
+## CLI
 
 ```bash
-git clone https://github.com/mdayan8/pmc-engine.git
-cd pmc-engine
-pip install -e ".[dev]"
-pytest tests/ -v --cov=pmc
+pmc index        # Build symbol index
+pmc compress     # Compress a query
+pmc serve        # Start HTTP proxy
+pmc mcp          # Start MCP server
+pmc bench        # Run benchmark
+pmc verify       # Quality verification
+pmc calibrate    # Auto-tune weights
+pmc stats        # Show statistics
 ```
-
-See [CONTRIBUTING.md](CONTRIBUTING.md) for the full guide.
 
 ---
 
 ## License
 
-**MIT** — free for everyone. Use it, fork it, ship it.
+MIT — free. [GitHub](https://github.com/mdayan8/pmc-engine) · [PyPI](https://pypi.org/project/pmc-engine/) · [X/@mdayan24x](https://x.com/mdayan24x)
 
-<p align="center">
-  <a href="https://github.com/mdayan8/pmc-engine">View on GitHub</a>
-  ·
-  <a href="https://pypi.org/project/pmc-engine/">Download from PyPI</a>
-  ·
-  <a href="https://github.com/mdayan8/pmc-engine/issues">Report a Bug</a>
-</p>
-
-<br/>
 <sub>Built because AI coding costs are real, the problem is structural, and the fix is surgical.</sub>

@@ -1,0 +1,84 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 620" font-family="'SF Mono','Menlo','Consolas',monospace">
+  <defs>
+    <linearGradient id="bg-grad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#0a0c10;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#10141a;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="l1" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#00e5a0;stop-opacity:0.15" />
+      <stop offset="100%" style="stop-color:#00e5a0;stop-opacity:0.05" />
+    </linearGradient>
+    <linearGradient id="l2" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#0099ff;stop-opacity:0.15" />
+      <stop offset="100%" style="stop-color:#0099ff;stop-opacity:0.05" />
+    </linearGradient>
+    <linearGradient id="l3" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#bf7fff;stop-opacity:0.15" />
+      <stop offset="100%" style="stop-color:#bf7fff;stop-opacity:0.05" />
+    </linearGradient>
+    <linearGradient id="l4" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#ffcc00;stop-opacity:0.15" />
+      <stop offset="100%" style="stop-color:#ffcc00;stop-opacity:0.05" />
+    </linearGradient>
+    <linearGradient id="l5" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#ff5c5c;stop-opacity:0.15" />
+      <stop offset="100%" style="stop-color:#ff5c5c;stop-opacity:0.05" />
+    </linearGradient>
+    <filter id="shadow"><feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#000" flood-opacity="0.3"/></filter>
+  </defs>
+
+  <rect width="800" height="620" fill="url(#bg-grad)" rx="12"/>
+
+  <!-- Title -->
+  <text x="400" y="30" text-anchor="middle" fill="#e0e8f0" font-size="16" font-weight="bold">PMC Engine — 7-Layer Architecture</text>
+
+  <!-- Input arrow -->
+  <text x="400" y="55" text-anchor="middle" fill="#5a6a7a" font-size="11">User Query: "Fix the race condition in login"</text>
+  <polygon points="390,75 410,75 400,85" fill="#5a6a7a"/>
+
+  <!-- L1 -->
+  <rect x="40" y="90" width="720" height="52" fill="url(#l1)" stroke="#00e5a0" stroke-width="0.5" rx="6" filter="url(#shadow)"/>
+  <rect x="40" y="90" width="4" height="52" fill="#00e5a0" rx="2"/>
+  <text x="56" y="110" fill="#00e5a0" font-size="12" font-weight="bold">L1: LIVE SYMBOL INDEX</text>
+  <text x="56" y="128" fill="#5a6a7a" font-size="10">AST-parse 48 files → 294 symbols + 770 call edges + import/config/type/test/convention deps</text>
+  <polygon points="400,157 420,157 410,167" fill="#00e5a0"/>
+
+  <!-- L2 -->
+  <rect x="40" y="170" width="720" height="52" fill="url(#l2)" stroke="#0099ff" stroke-width="0.5" rx="6" filter="url(#shadow)"/>
+  <rect x="40" y="170" width="4" height="52" fill="#0099ff" rx="2"/>
+  <text x="56" y="190" fill="#0099ff" font-size="12" font-weight="bold">L2: HYBRID INTENT PARSER</text>
+  <text x="56" y="208" fill="#5a6a7a" font-size="10">"Fix race condition" → OpType: DEBUG | Target: login | Blast: MEDIUM | Budget: 5,250 tok</text>
+  <polygon points="400,237 420,237 410,247" fill="#0099ff"/>
+
+  <!-- L3 -->
+  <rect x="40" y="250" width="720" height="52" fill="url(#l3)" stroke="#bf7fff" stroke-width="0.5" rx="6" filter="url(#shadow)"/>
+  <rect x="40" y="250" width="4" height="52" fill="#bf7fff" rx="2"/>
+  <text x="56" y="270" fill="#bf7fff" font-size="12" font-weight="bold">L3: SURGICAL SCORER</text>
+  <text x="56" y="288" fill="#5a6a7a" font-size="10">login=3.0(T1) · verify_pw=1.5(T2) · query=1.5(T2) · connect=0.6(T3) · format_date=0.0(OMIT)</text>
+  <polygon points="400,317 420,317 410,327" fill="#bf7fff"/>
+
+  <!-- L4 -->
+  <rect x="40" y="330" width="720" height="52" fill="url(#l4)" stroke="#ffcc00" stroke-width="0.5" rx="6" filter="url(#shadow)"/>
+  <rect x="40" y="330" width="4" height="52" fill="#ffcc00" rx="2"/>
+  <text x="56" y="350" fill="#ffcc00" font-size="12" font-weight="bold">L4: TIERED CONTEXT BUILDER</text>
+  <text x="56" y="368" fill="#5a6a7a" font-size="10">T1 (full code): 1 sym | T2 (signatures): 4 syms | T3 (stubs): 2 syms | Blast radius: 1 sym</text>
+  <polygon points="400,397 420,397 410,407" fill="#ffcc00"/>
+
+  <!-- L5 -->
+  <rect x="40" y="410" width="720" height="52" fill="url(#l5)" stroke="#ff5c5c" stroke-width="0.5" rx="6" filter="url(#shadow)"/>
+  <rect x="40" y="410" width="4" height="52" fill="#ff5c5c" rx="2"/>
+  <text x="56" y="430" fill="#ff5c5c" font-size="12" font-weight="bold">L5: SESSION CACHE + DEMAND EXPANSION</text>
+  <text x="56" y="448" fill="#5a6a7a" font-size="10">Turn 1: full → cache → Turn 2: delta only · Passive scan for [EXPAND: X] in AI responses</text>
+
+  <!-- Output box -->
+  <polygon points="400,490 420,490 410,500" fill="#5a6a7a"/>
+  <rect x="40" y="505" width="720" height="100" fill="#070a0d" stroke="#1a2028" stroke-width="1" rx="6"/>
+  <text x="56" y="522" fill="#00e5a0" font-size="11" font-weight="bold"># PMC Context — Operation: DEBUG [balanced]</text>
+  <text x="56" y="538" fill="#5a6a7a" font-size="10"># ═══ TIER 1: FULL CODE ═══</text>
+  <text x="56" y="554" fill="#0099ff" font-size="10">def login(self, email, password, ip):  # FILE: auth_service.py lines 33-93</text>
+  <text x="56" y="570" fill="#5a6a7a" font-size="10"># ═══ TIER 2: SIGNATURES ═══</text>
+  <text x="56" y="586" fill="#5a6a7a" font-size="10"># def verify_password(plain,hash)→bool  [crypto.py:14]</text>
+
+  <!-- Result -->
+  <text x="400" y="615" text-anchor="middle" fill="#00e5a0" font-size="11">→ 7,568 tokens vs 202,131 naive (96.3% reduction)</text>
+</svg>

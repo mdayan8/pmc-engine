@@ -1,0 +1,90 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" font-family="'SF Mono','Menlo','Consolas',monospace">
+  <defs>
+    <linearGradient id="pmc-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#00e5a0;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0099ff;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="raw-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#ff5c5c;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#ff8c5c;stop-opacity:1" />
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+      <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="800" height="500" fill="#0a0c10" rx="12"/>
+  <rect x="0" y="0" width="800" height="500" fill="none" stroke="#1a2028" stroke-width="1" rx="12"/>
+
+  <!-- Title -->
+  <text x="400" y="40" text-anchor="middle" fill="#e0e8f0" font-size="20" font-weight="bold">PMC Engine — Token Comparison</text>
+  <text x="400" y="60" text-anchor="middle" fill="#5a6a7a" font-size="12">FastAPI Codebase · 48 files · 294 symbols · 33K LOC</text>
+
+  <!-- Labels -->
+  <text x="40" y="100" fill="#e0e8f0" font-size="13" font-weight="bold">EASY — Add None check</text>
+  <text x="40" y="120" fill="#5a6a7a" font-size="10">BackgroundTasks.add_task</text>
+
+  <text x="40" y="190" fill="#e0e8f0" font-size="13" font-weight="bold">MEDIUM — Fix function shadowing</text>
+  <text x="40" y="210" fill="#5a6a7a" font-size="10">request_response in routing.py</text>
+
+  <text x="40" y="280" fill="#e0e8f0" font-size="13" font-weight="bold">HARD — Middleware validation</text>
+  <text x="40" y="300" fill="#5a6a7a" font-size="10">FastAPI.__init__ + middleware flow</text>
+
+  <!-- Easy Bar - RAW -->
+  <rect x="40" y="130" width="580" height="14" fill="#1a2028" rx="3"/>
+  <rect x="40" y="130" width="580" height="14" fill="url(#raw-grad)" rx="3" opacity="0.8"/>
+  <text x="630" y="141" fill="#ff5c5c" font-size="11" font-weight="bold">202,131 tok</text>
+  <text x="40" y="148" fill="#fff" font-size="9">RAW: full codebase dump</text>
+
+  <!-- Easy Bar - PMC -->
+  <rect x="40" y="148" width="580" height="14" fill="#1a2028" rx="3"/>
+  <rect x="40" y="148" width="22" height="14" fill="url(#pmc-grad)" rx="3"/>
+  <text x="270" y="159" fill="#00e5a0" font-size="11" font-weight="bold">7,119 tok</text>
+  <text x="40" y="166" fill="#00e5a0" font-size="9">PMC: compressed context (96.5% reduction)</text>
+
+  <!-- Medium Bar - RAW -->
+  <rect x="40" y="220" width="580" height="14" fill="#1a2028" rx="3"/>
+  <rect x="40" y="220" width="580" height="14" fill="url(#raw-grad)" rx="3" opacity="0.8"/>
+  <text x="630" y="231" fill="#ff5c5c" font-size="11" font-weight="bold">202,131 tok</text>
+
+  <!-- Medium Bar - PMC -->
+  <rect x="40" y="238" width="580" height="14" fill="#1a2028" rx="3"/>
+  <rect x="40" y="238" width="24" height="14" fill="url(#pmc-grad)" rx="3"/>
+  <text x="270" y="249" fill="#00e5a0" font-size="11" font-weight="bold">7,836 tok</text>
+
+  <!-- Hard Bar - RAW -->
+  <rect x="40" y="310" width="580" height="14" fill="#1a2028" rx="3"/>
+  <rect x="40" y="310" width="580" height="14" fill="url(#raw-grad)" rx="3" opacity="0.8"/>
+  <text x="630" y="321" fill="#ff5c5c" font-size="11" font-weight="bold">202,131 tok</text>
+
+  <!-- Hard Bar - PMC -->
+  <rect x="40" y="328" width="580" height="14" fill="#1a2028" rx="3"/>
+  <rect x="40" y="328" width="24" height="14" fill="url(#pmc-grad)" rx="3"/>
+  <text x="270" y="339" fill="#00e5a0" font-size="11" font-weight="bold">7,749 tok</text>
+
+  <!-- Legend -->
+  <rect x="40" y="370" width="12" height="12" fill="url(#raw-grad)" rx="2"/>
+  <text x="58" y="380" fill="#5a6a7a" font-size="11">Without PMC (full codebase dump)</text>
+  <rect x="240" y="370" width="12" height="12" fill="url(#pmc-grad)" rx="2"/>
+  <text x="258" y="380" fill="#5a6a7a" font-size="11">With PMC (compressed context)</text>
+
+  <!-- Stats box -->
+  <rect x="40" y="400" width="720" height="85" fill="#12161c" rx="8"/>
+  <rect x="40" y="400" width="720" height="85" fill="none" stroke="#1a2028" stroke-width="1" rx="8"/>
+
+  <text x="400" y="420" text-anchor="middle" fill="#5a6a7a" font-size="10" text-transform="uppercase" letter-spacing="2">Average Results Across All Tasks</text>
+
+  <text x="120" y="450" text-anchor="middle" fill="#ff5c5c" font-size="28" font-weight="bold">202,131</text>
+  <text x="120" y="465" text-anchor="middle" fill="#5a6a7a" font-size="9">Tokens (Without PMC)</text>
+
+  <text x="310" y="450" text-anchor="middle" fill="#00e5a0" font-size="28" font-weight="bold">7,568</text>
+  <text x="310" y="465" text-anchor="middle" fill="#5a6a7a" font-size="9">Tokens (With PMC)</text>
+
+  <text x="500" y="450" text-anchor="middle" fill="#ffcc00" font-size="28" font-weight="bold">96.3%</text>
+  <text x="500" y="465" text-anchor="middle" fill="#5a6a7a" font-size="9">Token Reduction</text>
+
+  <text x="660" y="450" text-anchor="middle" fill="#0099ff" font-size="28" font-weight="bold">26.7×</text>
+  <text x="660" y="465" text-anchor="middle" fill="#5a6a7a" font-size="9">More Efficient</text>
+</svg>

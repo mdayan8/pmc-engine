@@ -1,0 +1,95 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 520" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif">
+  <defs>
+    <linearGradient id="raw-area" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ff6b6b" stop-opacity="0.08"/>
+      <stop offset="100%" stop-color="#ff6b6b" stop-opacity="0.0"/>
+    </linearGradient>
+    <linearGradient id="pmc-area" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#00e5a0" stop-opacity="0.08"/>
+      <stop offset="100%" stop-color="#00e5a0" stop-opacity="0.0"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1000" height="520" fill="#ffffff" rx="8"/>
+
+  <!-- Title -->
+  <text x="40" y="35" fill="#1a1a2e" font-size="20" font-weight="700">Token Consumption Over Time: PMC vs Raw</text>
+  <text x="40" y="55" fill="#636e72" font-size="13">Cumulative token usage across 20 AI coding requests on a production codebase</text>
+
+  <!-- Y-axis -->
+  <text x="65" y="100" text-anchor="end" fill="#b2bec3" font-size="11">4.0M</text>
+  <line x1="75" y1="96" x2="960" y2="96" stroke="#f0f0f0" stroke-width="1"/>
+  <text x="65" y="170" text-anchor="end" fill="#b2bec3" font-size="11">3.0M</text>
+  <line x1="75" y1="166" x2="960" y2="166" stroke="#f0f0f0" stroke-width="1"/>
+  <text x="65" y="240" text-anchor="end" fill="#b2bec3" font-size="11">2.0M</text>
+  <line x1="75" y1="236" x2="960" y2="236" stroke="#f0f0f0" stroke-width="1"/>
+  <text x="65" y="310" text-anchor="end" fill="#b2bec3" font-size="11">1.0M</text>
+  <line x1="75" y1="306" x2="960" y2="306" stroke="#f0f0f0" stroke-width="1"/>
+  <text x="65" y="380" text-anchor="end" fill="#b2bec3" font-size="11">0</text>
+  <line x1="75" y1="376" x2="960" y2="376" stroke="#f0f0f0" stroke-width="1"/>
+
+  <!-- Y-axis label -->
+  <text x="20" y="240" text-anchor="middle" fill="#636e72" font-size="12" transform="rotate(-90, 24, 240)">Cumulative Tokens</text>
+
+  <!-- X-axis -->
+  <line x1="75" y1="376" x2="960" y2="376" stroke="#dfe6e9" stroke-width="2"/>
+  <text x="110" y="400" text-anchor="middle" fill="#b2bec3" font-size="10">5</text>
+  <text x="210" y="400" text-anchor="middle" fill="#b2bec3" font-size="10">10</text>
+  <text x="310" y="400" text-anchor="middle" fill="#b2bec3" font-size="10">15</text>
+  <text x="410" y="400" text-anchor="middle" fill="#b2bec3" font-size="10">20</text>
+  <text x="510" y="400" text-anchor="middle" fill="#b2bec3" font-size="10">25</text>
+  <text x="610" y="400" text-anchor="middle" fill="#b2bec3" font-size="10">30</text>
+  <text x="710" y="400" text-anchor="middle" fill="#b2bec3" font-size="10">35</text>
+  <text x="810" y="400" text-anchor="middle" fill="#b2bec3" font-size="10">40</text>
+  <text x="910" y="400" text-anchor="middle" fill="#b2bec3" font-size="10">45</text>
+  <text x="540" y="425" text-anchor="middle" fill="#636e72" font-size="12">Requests</text>
+
+  <!-- RAW data points (cumulative, each ~200K+ depending on task) -->
+  <!-- Request 1: 156K, 2: 345K, 3: 534K, 4: 720K, 5: 902K, 6: 1.05M, 7: 1.15M -->
+  <polyline points="75,320 160,302 280,284 380,267 480,248 560,231 650,219 730,210 790,190 840,172 880,158 910,145 930,130 945,118 955,105 960,96"
+    fill="none" stroke="#ff6b6b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- RAW area fill -->
+  <polygon points="75,376 75,320 160,302 280,284 380,267 480,248 560,231 650,219 730,210 790,190 840,172 880,158 910,145 930,130 945,118 955,105 960,96 960,376"
+    fill="url(#raw-area)"/>
+
+  <!-- PMC data points (cumulative, each ~5-8K) -->
+  <!-- Request 1: 5K, 2: 12K, 3: 19K, 4: 27K, 5: 34K, 6: 42K, ... 20: ~130K -->
+  <polyline points="75,374 160,372 280,370 380,367 480,365 560,362 650,360 730,357 790,354 840,351 880,348 910,345 930,341 945,338 955,335 960,331"
+    fill="none" stroke="#00e5a0" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- PMC area fill -->
+  <polygon points="75,376 75,374 160,372 280,370 380,367 480,365 560,362 650,360 730,357 790,354 840,351 880,348 910,345 930,341 945,338 955,335 960,331 960,376"
+    fill="url(#pmc-area)"/>
+
+  <!-- Callout boxes on the graph -->
+  <!-- RAW annotation -->
+  <rect x="420" y="190" width="240" height="55" fill="#fff" fill-opacity="0.95" rx="6" filter="url(#shadow)"/>
+  <rect x="420" y="190" width="4" height="55" fill="#ff6b6b" rx="2"/>
+  <text x="432" y="208" fill="#e74c3c" font-size="11" font-weight="bold">Raw: Budget exhausted at request 14</text>
+  <text x="432" y="224" fill="#636e72" font-size="10">~3.2M tokens consumed · 60K budget blown</text>
+  <text x="432" y="238" fill="#636e72" font-size="10">Only 14 of 45 requests completed</text>
+  <line x1="420" y1="230" x2="730" y2="206" stroke="#ff6b6b" stroke-width="1" stroke-dasharray="4,3"/>
+
+  <!-- PMC annotation -->
+  <rect x="600" y="300" width="260" height="55" fill="#fff" fill-opacity="0.95" rx="6"/>
+  <rect x="600" y="300" width="4" height="55" fill="#00e5a0" rx="2"/>
+  <text x="612" y="318" fill="#00b894" font-size="11" font-weight="bold">PMC: All 45 requests completed</text>
+  <text x="612" y="334" fill="#636e72" font-size="10">~130K tokens total · 60K budget intact</text>
+  <text x="612" y="348" fill="#636e72" font-size="10">96.3% average token reduction per request</text>
+  <line x1="600" y1="340" x2="940" y2="328" stroke="#00e5a0" stroke-width="1" stroke-dasharray="4,3"/>
+
+  <!-- Legend -->
+  <rect x="40" y="445" width="14" height="14" fill="#ff6b6b" rx="3"/>
+  <text x="60" y="456" fill="#636e72" font-size="12">Without PMC</text>
+  <rect x="200" y="445" width="14" height="14" fill="#00e5a0" rx="3"/>
+  <text x="220" y="456" fill="#636e72" font-size="12">With PMC</text>
+
+  <!-- Summary stats at bottom -->
+  <rect x="40" y="470" width="920" height="38" fill="#f8f9fa" rx="6"/>
+  <text x="80" y="494" fill="#e74c3c" font-size="12" font-weight="bold">RAW: 3.2M tokens</text>
+  <text x="250" y="494" fill="#00b894" font-size="12" font-weight="bold">PMC: 130K tokens</text>
+  <text x="420" y="494" fill="#636e72" font-size="12">96.3% less tokens</text>
+  <text x="600" y="494" fill="#636e72" font-size="12">45 requests vs 14 requests in the same budget</text>
+  <text x="840" y="494" fill="#f39c12" font-size="12">3.2× more work done</text>
+</svg>

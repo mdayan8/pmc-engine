@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PMC Engine — Real Comparison</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0a0c10; --surface: #12161c; --surface2: #1a2028;
+    --border: #232a34; --accent: #00e5a0; --accent2: #0099ff;
+    --red: #ff5c5c; --yellow: #ffcc00; --text: #e0e8f0; --muted: #6a7a8a;
+    --font: 'Inter', system-ui, sans-serif; --mono: 'JetBrains Mono', monospace;
+  }
+  body { background: var(--bg); color: var(--text); font-family: var(--font); padding: 20px; max-width: 1400px; margin: 0 auto; }
+  h1 { font-size: 22px; font-weight: 800; }
+  .subtitle { color: var(--muted); font-size: 13px; margin-bottom: 20px; }
+
+  .hero-btn {
+    display: block; width: 100%; padding: 18px; font-size: 18px; font-weight: 700; font-family: var(--font);
+    text-align: center; border: 2px solid var(--accent); border-radius: 10px;
+    background: rgba(0,229,160,0.06); color: var(--accent); cursor: pointer;
+    transition: all 0.2s; margin-bottom: 20px; letter-spacing: 0.02em;
+  }
+  .hero-btn:hover { background: rgba(0,229,160,0.15); }
+  .hero-btn:disabled { opacity: 0.5; cursor: wait; }
+  .hero-btn.running { border-color: var(--yellow); color: var(--yellow); background: rgba(255,204,0,0.06); animation: pulse 1.5s infinite; }
+  @keyframes pulse { 0%,100%{opacity:0.7} 50%{opacity:1} }
+
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 18px; }
+  .card.full { grid-column: 1 / -1; }
+  .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+  .card-title { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
+  .badge { font-size: 10px; font-weight: 600; padding: 3px 8px; border-radius: 4px; text-transform: uppercase; }
+  .badge.pmc { background: rgba(0,229,160,0.12); color: var(--accent); border: 1px solid rgba(0,229,160,0.25); }
+  .badge.raw { background: rgba(255,92,92,0.12); color: var(--red); border: 1px solid rgba(255,92,92,0.25); }
+  .badge.ok { background: rgba(0,229,160,0.1); color: var(--accent); border: 1px solid rgba(0,229,160,0.2); }
+  .badge.run { background: rgba(0,153,255,0.12); color: var(--accent2); border: 1px solid rgba(0,153,255,0.25); animation: pulse 1s infinite; }
+
+  .stat-row { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 8px; }
+  .stat { flex: 1; min-width: 90px; }
+  .stat-value { font-family: var(--mono); font-size: 22px; font-weight: 700; }
+  .stat-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+  .stat-value.green { color: var(--accent); } .stat-value.blue { color: var(--accent2); }
+  .stat-value.red { color: var(--red); } .stat-value.white { color: var(--text); }
+
+  .task { margin-top: 12px; border-top: 1px solid var(--border); padding-top: 12px; }
+  .task-header { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 6px; }
+  .task-diff { font-family: var(--mono); font-size: 12px; line-height: 1.5; white-space: pre-wrap; overflow-x: auto; background: #070a0d; border: 1px solid var(--border); border-radius: 6px; padding: 12px; max-height: 200px; overflow-y: auto; color: #c0d0e0; }
+  .task-diff .kw { color: #0099ff; } .task-diff .str { color: #00e5a0; } .task-diff .com { color: #5a6a7a; } .task-diff .fn { color: #ffcc00; }
+
+  .input-bar { display: flex; gap: 12px; margin-bottom: 16px; align-items: center; }
+  .api-input { flex: 1; padding: 10px 14px; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-family: var(--mono); font-size: 13px; }
+  .api-input:focus { outline: none; border-color: var(--accent); }
+
+  .summary { padding: 14px; background: var(--surface2); border-radius: 8px; }
+  .summary-grid { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 10px; text-align: center; }
+  .summary-num { font-family: var(--mono); font-size: 26px; font-weight: 700; }
+  .summary-label { font-size: 10px; color: var(--muted); text-transform: uppercase; margin-top: 2px; }
+
+  .actions { display: flex; gap: 8px; margin: 12px 0; }
+  .btn { padding: 7px 16px; border: 1px solid var(--border); border-radius: 6px; background: var(--surface); color: var(--text); font-size: 12px; cursor: pointer; font-family: var(--font); }
+  .btn:hover { background: var(--surface2); border-color: var(--accent); }
+
+  @media (max-width: 800px) { .grid { grid-template-columns: 1fr; } .summary-grid { grid-template-columns: 1fr 1fr; } }
+</style>
+</head>
+<body>
+
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+  <div>
+    <h1>⚡ PMC Engine — Real AI Comparison</h1>
+    <p class="subtitle" style="margin-bottom:0">Same FastAPI codebase · Same 3 tasks · <span style="color:var(--accent)">WITH</span> and <span style="color:var(--red)">WITHOUT</span> PMC</p>
+  </div>
+  <span id="status" class="badge ok">● Connected</span>
+</div>
+
+<div class="input-bar">
+  <input type="password" id="api-key" class="api-input" placeholder="DeepSeek API key (sk-...)" value="">
+  <button class="btn" onclick="runAll()" id="run-btn" style="font-size:14px;font-weight:600">🧪 RUN 3 TASKS</button>
+</div>
+
+<div class="grid" id="main"></div>
+<div id="summary-card" style="display:none" class="card full"></div>
+<div class="actions"><button class="btn" onclick="refresh()">⟳ Refresh Stats</button><button class="btn" onclick="resetAll()">Reset Trackers</button></div>
+<div style="text-align:right;font-size:10px;font-family:var(--mono);color:var(--muted);margin-top:8px" id="updated"></div>
+
+<script>
+let running = false;
+
+function esc(s) { return String(s||'').replace(/[<>&]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[c])); }
+
+function highlightPy(code) {
+  return esc(code)
+    .replace(/(def |class |import |from |return |if |elif |else |for |while |try |except |finally |with |as |async |await |raise |pass |yield |in |not |and |or |True|False|None)\b/g, '<span class="kw">$1</span>')
+    .replace(/(\"\"\"[\s\S]*?\"\"\"|'''[\s\S]*?'''|#.*)/g, '<span class="com">$1</span>')
+    .replace(/('.*?'|".*?")/g, '<span class="str">$1</span>');
+}
+
+const TASKS = [
+  {id:"easy", diff:"🟢 EASY",   query:"Add a None check for the func parameter in BackgroundTasks.add_task. If func is None, raise a ValueError with a clear error message. Also add a type hint for the return type.", max:1024},
+  {id:"medium",diff:"🟡 MEDIUM",query:"Fix the nested 'app' function name clash in request_response in routing.py. The inner 'async def app' shadows the outer 'async def app' at line 110. Rename the inner one to 'inner_app'.", max:1536},
+  {id:"hard",  diff:"🔴 HARD",  query:"Add middleware ordering validation to FastAPI.__init__ in applications.py. Create _validate_middleware_order that checks if CORSMiddleware is placed before other middleware and warns if misordered.", max:2560},
+];
+
+async function runAll() {
+  const key = document.getElementById('api-key').value.trim();
+  if (!key) { alert('Enter your API key'); return; }
+
+  const btn = document.getElementById('run-btn');
+  if (running) return;
+  running = true;
+  btn.textContent = '⏳ Running 6 API calls (3 PMC + 3 RAW)...';
+  btn.disabled = true;
+
+  await fetch('/api/reset');
+
+  // Render initial cards
+  document.getElementById('main').innerHTML = `
+    <div class="card"><div class="card-header"><span class="card-title">✅ WITH PMC</span><span class="badge run" id="spmc">Running...</span></div><div class="stat-row" id="spmc-stats"><div class="stat"><div class="stat-value" id="pmc-tok">0</div><div class="stat-label">Tokens Used</div></div></div><div id="pmc-tasks"></div></div>
+    <div class="card"><div class="card-header"><span class="card-title">❌ WITHOUT PMC</span><span class="badge run" id="sraw">Running...</span></div><div class="stat-row" id="sraw-stats"><div class="stat"><div class="stat-value" id="raw-tok">0</div><div class="stat-label">Tokens Used</div></div></div><div id="raw-tasks"></div></div>
+  `;
+  document.getElementById('summary-card').style.display = 'none';
+
+  let pmcTotal = 0, rawTotal = 0;
+  let pmcResults = [], rawResults = [];
+
+  for (const t of TASKS) {
+    // PMC
+    try {
+      const r = await fetch('/api/run-test', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({api_key:key, query:t.query, difficulty:t.id, max_tokens:t.max})});
+      const d = await r.json();
+      const pmc = d.pmc?.[d.pmc.length-1] || {};
+      const raw = d.raw?.[d.raw.length-1] || {};
+      pmcResults.push(pmc); rawResults.push(raw);
+      pmcTotal += pmc.tokens_used || 0; rawTotal += raw.tokens_used || 0;
+      renderTask('pmc', t, pmc); renderTask('raw', t, raw);
+      document.getElementById('pmc-tok').textContent = pmcTotal.toLocaleString();
+      document.getElementById('raw-tok').textContent = rawTotal.toLocaleString();
+    } catch(e) { console.error(e); }
+  }
+
+  document.getElementById('spmc').textContent = 'Done ✅';
+  document.getElementById('sraw').textContent = 'Done ✅';
+  document.getElementById('spmc').className = 'badge ok';
+  document.getElementById('sraw').className = 'badge ok';
+
+  // Summary
+  const saved = rawTotal > 0 ? ((rawTotal - pmcTotal) / rawTotal * 100).toFixed(1) : 0;
+  const ratio = rawTotal > 0 && pmcTotal > 0 ? (rawTotal / pmcTotal).toFixed(1) : 0;
+  document.getElementById('summary-card').style.display = 'block';
+  document.getElementById('summary-card').innerHTML = `
+    <div class="card-header"><span class="card-title">📊 COMPARISON</span></div>
+    <div class="summary-grid">
+      <div class="summary-item"><div class="summary-num" style="color:var(--accent)">${pmcTotal.toLocaleString()}</div><div class="summary-label">Tokens (PMC)</div></div>
+      <div class="summary-item"><div class="summary-num" style="color:var(--red)">${rawTotal.toLocaleString()}</div><div class="summary-label">Tokens (RAW)</div></div>
+      <div class="summary-item"><div class="summary-num" style="color:var(--accent)">${saved}%</div><div class="summary-label">Tokens Saved</div></div>
+      <div class="summary-item"><div class="summary-num" style="color:var(--accent2)">${ratio}x</div><div class="summary-label">More Efficient</div></div>
+    </div>
+    <div style="margin-top:10px;padding:12px;background:var(--bg);border-radius:6px;font-size:13px">
+      PMC compressed <b style="color:var(--accent)">${(pmcTotal/1000).toFixed(0)}K tokens</b> to fix 3 real bugs.
+      RAW sent <b style="color:var(--red)">${(rawTotal/1000).toFixed(0)}K tokens</b> fixing the same bugs.
+      <b>${ratio}x more efficient with PMC.</b> Same AI model. Same fixes.
+    </div>
+  `;
+
+  btn.textContent = '🧪 RUN 3 TASKS';
+  btn.disabled = false;
+  running = false;
+}
+
+function renderTask(side, task, data) {
+  const container = document.getElementById(`${side}-tasks`);
+  const resp = data.response || '';
+  const reduction = data.reduction_pct ? `(${data.reduction_pct}% reduction)` : '';
+  const rTokens = data.naive_tokens ? `${data.naive_tokens.toLocaleString()} → ` : '';
+  const html = `
+    <div class="task">
+      <div class="task-header">
+        <span>${task.diff} ${task.query.slice(0,60)}...</span>
+        <span style="font-family:var(--mono);font-size:11px"><span style="color:${side==='pmc'?'var(--accent)':'var(--red)'}">${rTokens}${(data.tokens_used||0).toLocaleString()} tok</span> ${reduction}</span>
+      </div>
+      <div class="task-diff">${highlightPy(resp.slice(0,2000))}${resp.length > 2000 ? '...' : ''}</div>
+    </div>
+  `;
+  container.insertAdjacentHTML('beforeend', html);
+}
+
+async function refresh() {
+  try {
+    const r = await fetch('/api/compare');
+    const d = await r.json();
+    if (d.pmc && !d.pmc.error) { document.getElementById('pmc-tok').textContent = (d.pmc.total_tokens||0).toLocaleString(); }
+    if (d.raw && !d.raw.error) { document.getElementById('raw-tok').textContent = (d.raw.total_tokens||0).toLocaleString(); }
+    document.getElementById('updated').textContent = 'Updated: ' + new Date().toLocaleTimeString();
+  } catch(e) {}
+}
+
+async function resetAll() {
+  if (!confirm('Reset all trackers?')) return;
+  await fetch('/api/reset');
+  document.getElementById('pmc-tok').textContent = '0';
+  document.getElementById('raw-tok').textContent = '0';
+  document.getElementById('summary-card').style.display = 'none';
+  document.getElementById('main').innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted);font-size:14px">Click "RUN 3 TASKS" to start the comparison test</div>';
+}
+
+setInterval(refresh, 5000);
+refresh();
+</script>
+</body>
+</html>

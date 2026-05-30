@@ -1,0 +1,48 @@
+name: Weekly Benchmark
+
+on:
+  schedule:
+    - cron: "0 9 * * 1"  # Every Monday 9am
+  workflow_dispatch:
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install
+        run: |
+          pip install pytest pytest-cov
+          pip install -e .
+
+      - name: Run benchmark
+        run: |
+          python -c "
+          from pmc import PMCEngine
+          from pmc.verify import Verifier
+
+          engine = PMCEngine()
+          engine.index('tests/test_fixtures/sample_auth')
+
+          verifier = Verifier(engine)
+          result = verifier.verify('tests/test_fixtures/sample_auth', num_tasks=20, verbose=True)
+          verifier.print_report(result)
+
+          # Fail if quality drops below threshold
+          assert result['quality_score'] >= 80, f'Quality degraded to {result[\"quality_score\"]}%'
+          assert result['avg_reduction_pct'] >= 30, f'Reduction degraded to {result[\"avg_reduction_pct\"]}%'
+          "
+
+      - name: Upload benchmark results
+        uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-results
+          path: .benchmark_results.json
+          retention-days: 90

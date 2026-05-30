@@ -1,0 +1,20 @@
+{
+  "hooks": {
+    "UserPromptSubmit": {
+      "type": "command",
+      "command": "hooks/user-prompt-submit.sh",
+      "timeout_ms": 5000
+    },
+    "PreToolUse": {
+      "type": "command",
+      "command": "hooks/pre-tool-use.sh",
+      "timeout_ms": 3000
+    }
+  },
+  "mcpServers": {
+    "pmc": {
+      "command": "pmc",
+      "args": ["mcp"]
+    }
+  }
+}

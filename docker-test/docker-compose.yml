@@ -1,0 +1,66 @@
+version: "3.9"
+
+services:
+  pmc-proxy:
+    build:
+      context: ..
+      dockerfile: docker-test/proxy/Dockerfile
+      args:
+        PMC_MODE: "enabled"
+    container_name: pmc-proxy
+    ports:
+      - "8080:80"
+    environment:
+      - PROXY_TYPE=pmc
+      - TOKEN_BUDGET=60000
+      - UPSTREAM_URL=https://api.deepseek.com/anthropic
+      - LOG_LEVEL=info
+    volumes:
+      - pmc-index:/app/index
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  raw-proxy:
+    build:
+      context: ..
+      dockerfile: docker-test/proxy/Dockerfile
+      args:
+        PMC_MODE: "disabled"
+    container_name: raw-proxy
+    ports:
+      - "8081:80"
+    environment:
+      - PROXY_TYPE=raw
+      - TOKEN_BUDGET=60000
+      - UPSTREAM_URL=https://api.deepseek.com/anthropic
+      - LOG_LEVEL=info
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  dashboard:
+    build:
+      context: dashboard
+    container_name: pmc-dashboard
+    ports:
+      - "8082:80"
+    environment:
+      - PMC_PROXY_URL=http://pmc-proxy:80
+      - RAW_PROXY_URL=http://raw-proxy:80
+      - REFRESH_INTERVAL=5
+    depends_on:
+      pmc-proxy:
+        condition: service_healthy
+      raw-proxy:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  pmc-index:

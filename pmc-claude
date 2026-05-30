@@ -1,0 +1,41 @@
+#!/bin/bash
+# pmc-claude — Launch Claude Code with PMC compression automatically
+# Like fcc-claude, but for PMC compression
+#
+# Usage:
+#   pmc-claude                    # Interactive session
+#   pmc-claude "fix the bug"      # Single query
+#
+# What it does:
+#   1. Starts PMC proxy on port 8088
+#   2. Indexes the current directory
+#   3. Launches Claude Code with proxy as intermediary
+#   4. Routes: Claude → PMC (compress) → DeepSeek
+
+set -e
+
+PMC_DIR="$(cd "$(dirname "$0")" && pwd)"
+PORT=8088
+
+# Start PMC proxy
+PYTHONPATH="$PMC_DIR:$PMC_DIR/docker-test/proxy" \
+PROXY_TYPE=pmc \
+SOURCE_ROOT="$(pwd)" \
+nohup python3 -m uvicorn docker-test.proxy.server:app \
+  --host 127.0.0.1 --port $PORT \
+  --log-level error > /tmp/pmc-proxy.log 2>&1 &
+PROXY_PID=$!
+
+# Wait and index
+sleep 1
+curl -s -X POST http://127.0.0.1:$PORT/index > /dev/null 2>&1 || true
+
+# Export proxy env vars and run claude
+ANTHROPIC_BASE_URL="http://127.0.0.1:$PORT" \
+ANTHROPIC_AUTH_TOKEN="${ANTHROPIC_AUTH_TOKEN}" \
+ANTHROPIC_MODEL="deepseek-v4-flash" \
+CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY="1" \
+claude "$@"
+
+# Cleanup: kill proxy when claude exits
+kill $PROXY_PID 2>/dev/null || true

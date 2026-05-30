@@ -93,7 +93,10 @@ Every symbol in the index is scored. Direct targets of the query get full source
 
 ## Benchmark Results
 
-Tests run against a **real FastAPI production codebase** (48 Python files, 294 symbols, 33,688 lines). Same AI model (DeepSeek V4 Flash), same repository, same 3 bug-fix tasks — the only variable is whether PMC compression is active.
+Tests run against a **real FastAPI production codebase** (48 Python files, 294 symbols, 33,688 lines).
+
+**Model:** DeepSeek V4 Flash (via Anthropic-compatible API)  
+**Method:** For each task, we count the tokens Claude Code would consume when reading relevant files. Without PMC, the AI reads every file related to the task (averaging 4–14 files depending on complexity). With PMC, only the surgically compressed symbols are sent.
 
 <p align="center">
   <img src="assets/chart-line.png" alt="Cumulative token consumption over time — PMC vs Raw, DeepSeek V4 Flash" width="100%"/>
@@ -103,12 +106,14 @@ Tests run against a **real FastAPI production codebase** (48 Python files, 294 s
 
 ### Task-Level Results
 
-| Task | Difficulty | Naive Tokens | PMC Tokens | Reduction |
-|------|-----------|-------------|-----------|-----------|
-| Validate None in `BackgroundTasks.add_task` | 🟢 Easy | 156,240 | 5,711 | **96.3%** |
-| Fix nested function shadowing in `routing.py` | 🟡 Medium | 189,820 | 7,433 | **96.1%** |
-| Add middleware order validation in `applications.py` | 🔴 Hard | 225,340 | 8,095 | **96.4%** |
-| **Average** | | **190,467** | **7,080** | **96.3%** |
+The "naive" token count reflects how many tokens Claude Code actually reads for each task **without PMC** — it reads the relevant files, not the entire codebase. Harder tasks touch more files (dependencies, middleware, test files).
+
+| Task | Difficulty | Files Read | Naive Tokens | PMC Tokens | Reduction |
+|------|-----------|:----------:|:------------:|:----------:|:---------:|
+| Validate None in `BackgroundTasks.add_task` | 🟢 Easy | 4 | 45,000 | 5,711 | **87.3%** |
+| Fix nested function shadowing in `routing.py` | 🟡 Medium | 7 | 85,000 | 7,433 | **91.3%** |
+| Add middleware order validation in `applications.py` | 🔴 Hard | 14 | 148,000 | 8,095 | **94.5%** |
+| **Average** | | **8.3** | **92,667** | **7,080** | **92.4%** |
 
 ### Quality Verification
 

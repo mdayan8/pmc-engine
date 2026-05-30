@@ -25,9 +25,9 @@
 **PMC Engine** is a lightweight Python library that sits between your AI coding assistant (Claude Code, Cursor, Cline, Aider, Continue) and the LLM API. It analyzes your codebase, parses your intent, and sends only the surgically relevant code — cutting token usage by **40–96%** with **no quality loss**.
 
 <p align="center">
-  <img src="assets/bar-chart-comparison.svg" alt="PMC vs Raw token usage comparison" width="100%"/>
+  <img src="assets/chart-bar.png" alt="PMC vs Raw token usage comparison across 3 FastAPI bug-fix tasks" width="100%"/>
   <br/>
-  <em>Token reduction across 3 real FastAPI bug-fix tasks. Same AI model, same prompts.</em>
+  <em>Token reduction across 3 real FastAPI bug-fix tasks. Model: DeepSeek V4 Flash.</em>
 </p>
 
 <br/>
@@ -69,7 +69,7 @@ Existing solutions fail in different ways:
 ## How It Works
 
 <p align="center">
-  <img src="assets/architecture.svg" alt="PMC Engine architecture diagram" width="100%"/>
+  <img src="assets/architecture.svg" alt="PMC Engine 7-layer architecture diagram" width="100%"/>
 </p>
 
 ### The 4 Context Tiers
@@ -96,9 +96,9 @@ Every symbol in the index is scored. Direct targets of the query get full source
 Tests run against a **real FastAPI production codebase** (48 Python files, 294 symbols, 33,688 lines). Same AI model (DeepSeek V4 Flash), same repository, same 3 bug-fix tasks — the only variable is whether PMC compression is active.
 
 <p align="center">
-  <img src="assets/line-chart.svg" alt="Token consumption over time: PMC vs Raw" width="100%"/>
+  <img src="assets/chart-line.png" alt="Cumulative token consumption over time — PMC vs Raw, DeepSeek V4 Flash" width="100%"/>
   <br/>
-  <em>Cumulative token consumption across multiple AI coding requests. PMC stays flat while Raw skyrockets.</em>
+  <em>Cumulative token consumption across 45 AI coding requests. Model: DeepSeek V4 Flash.</em>
 </p>
 
 ### Task-Level Results
@@ -249,6 +249,12 @@ pmc-engine/
 ---
 
 ## Enterprise Savings
+
+<p align="center">
+  <img src="assets/chart-savings.png" alt="Enterprise cost savings with PMC Engine" width="100%"/>
+  <br/>
+  <em>Annual AI coding costs with and without PMC across company sizes.</em>
+</p>
 
 | Company | Engineers | Without PMC | With PMC | Net Annual Savings |
 |---------|-----------|-------------|----------|-------------------|

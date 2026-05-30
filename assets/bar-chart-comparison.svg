@@ -1,0 +1,100 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 500" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif">
+  <defs>
+    <linearGradient id="raw-bar" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#ff6b6b"/><stop offset="100%" stop-color="#c0392b"/></linearGradient>
+    <linearGradient id="pmc-bar" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#00e5a0"/><stop offset="100%" stop-color="#00b894"/></linearGradient>
+    <filter id="shadow"><feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.15"/></filter>
+  </defs>
+
+  <rect width="1000" height="500" fill="#ffffff" rx="8"/>
+
+  <!-- Title -->
+  <text x="40" y="40" fill="#2d3436" font-size="22" font-weight="bold">Token Usage Comparison: PMC vs Raw</text>
+  <text x="40" y="62" fill="#636e72" font-size="14">Real test against FastAPI codebase (48 files, 294 symbols, 33K LOC)</text>
+
+  <!-- Y-axis label -->
+  <text x="80" y="440" text-anchor="middle" fill="#636e72" font-size="12" transform="rotate(-90, 80, 440)">Tokens (thousands)</text>
+
+  <!-- Grid lines -->
+  <line x1="120" y1="100" x2="960" y2="100" stroke="#f0f0f0" stroke-width="1"/>
+  <text x="110" y="104" text-anchor="end" fill="#b2bec3" font-size="11">250K</text>
+  <line x1="120" y1="180" x2="960" y2="180" stroke="#f0f0f0" stroke-width="1"/>
+  <text x="110" y="184" text-anchor="end" fill="#b2bec3" font-size="11">200K</text>
+  <line x1="120" y1="260" x2="960" y2="260" stroke="#f0f0f0" stroke-width="1"/>
+  <text x="110" y="264" text-anchor="end" fill="#b2bec3" font-size="11">150K</text>
+  <line x1="120" y1="340" x2="960" y2="340" stroke="#f0f0f0" stroke-width="1"/>
+  <text x="110" y="344" text-anchor="end" fill="#b2bec3" font-size="11">100K</text>
+  <line x1="120" y1="420" x2="960" y2="420" stroke="#f0f0f0" stroke-width="1"/>
+  <text x="110" y="424" text-anchor="end" fill="#b2bec3" font-size="11">50K</text>
+
+  <!-- X-axis line -->
+  <line x1="120" y1="440" x2="960" y2="440" stroke="#dfe6e9" stroke-width="2"/>
+
+  <!-- Group 1: Easy -->
+  <text x="210" y="470" text-anchor="middle" fill="#2d3436" font-size="12" font-weight="bold">Easy</text>
+  <text x="210" y="485" text-anchor="middle" fill="#636e72" font-size="10">BackgroundTasks</text>
+
+  <!-- RAW bar - Easy (202131 → height = ~404px at scale, max bar height = 340) -->
+  <rect x="155" y="96" width="40" height="344" fill="#f0f0f0" rx="4"/>
+  <rect x="155" y="96" width="40" height="344" fill="url(#raw-bar)" rx="4" opacity="0.85" filter="url(#shadow)"/>
+  <text x="175" y="88" text-anchor="middle" fill="#e74c3c" font-size="11" font-weight="bold">202K</text>
+
+  <!-- PMC bar - Easy (7119 → ~14px at scale) -->
+  <rect x="215" y="422" width="40" height="18" fill="#f0f0f0" rx="4"/>
+  <rect x="215" y="422" width="40" height="18" fill="url(#pmc-bar)" rx="4" filter="url(#shadow)"/>
+  <text x="235" y="414" text-anchor="middle" fill="#00b894" font-size="10" font-weight="bold">7K</text>
+
+  <!-- Group 2: Medium -->
+  <text x="420" y="470" text-anchor="middle" fill="#2d3436" font-size="12" font-weight="bold">Medium</text>
+  <text x="420" y="485" text-anchor="middle" fill="#636e72" font-size="10">Routing fix</text>
+
+  <rect x="365" y="96" width="40" height="344" fill="#f0f0f0" rx="4"/>
+  <rect x="365" y="96" width="40" height="344" fill="url(#raw-bar)" rx="4" opacity="0.85" filter="url(#shadow)"/>
+  <text x="385" y="88" text-anchor="middle" fill="#e74c3c" font-size="11" font-weight="bold">202K</text>
+
+  <rect x="425" y="420" width="40" height="20" fill="#f0f0f0" rx="4"/>
+  <rect x="425" y="420" width="40" height="20" fill="url(#pmc-bar)" rx="4" filter="url(#shadow)"/>
+  <text x="445" y="412" text-anchor="middle" fill="#00b894" font-size="10" font-weight="bold">8K</text>
+
+  <!-- Group 3: Hard -->
+  <text x="630" y="470" text-anchor="middle" fill="#2d3436" font-size="12" font-weight="bold">Hard</text>
+  <text x="630" y="485" text-anchor="middle" fill="#636e72" font-size="10">Middleware</text>
+
+  <rect x="575" y="96" width="40" height="344" fill="#f0f0f0" rx="4"/>
+  <rect x="575" y="96" width="40" height="344" fill="url(#raw-bar)" rx="4" opacity="0.85" filter="url(#shadow)"/>
+  <text x="595" y="88" text-anchor="middle" fill="#e74c3c" font-size="11" font-weight="bold">202K</text>
+
+  <rect x="635" y="422" width="40" height="18" fill="#f0f0f0" rx="4"/>
+  <rect x="635" y="422" width="40" height="18" fill="url(#pmc-bar)" rx="4" filter="url(#shadow)"/>
+  <text x="655" y="414" text-anchor="middle" fill="#00b894" font-size="10" font-weight="bold">7K</text>
+
+  <!-- Averages -->
+  <text x="830" y="470" text-anchor="middle" fill="#2d3436" font-size="12" font-weight="bold">Average</text>
+  <text x="830" y="485" text-anchor="middle" fill="#636e72" font-size="10">All tasks</text>
+
+  <rect x="775" y="96" width="40" height="344" fill="#f0f0f0" rx="4"/>
+  <rect x="775" y="96" width="40" height="344" fill="url(#raw-bar)" rx="4" opacity="0.85" filter="url(#shadow)"/>
+  <text x="795" y="88" text-anchor="middle" fill="#e74c3c" font-size="11" font-weight="bold">202K</text>
+
+  <rect x="835" y="422" width="40" height="18" fill="#f0f0f0" rx="4"/>
+  <rect x="835" y="422" width="40" height="18" fill="url(#pmc-bar)" rx="4" filter="url(#shadow)"/>
+  <text x="855" y="414" text-anchor="middle" fill="#00b894" font-size="10" font-weight="bold">7K</text>
+
+  <!-- Legend -->
+  <rect x="700" y="24" width="14" height="14" fill="url(#raw-bar)" rx="3"/>
+  <text x="720" y="36" fill="#636e72" font-size="12">Without PMC</text>
+  <rect x="820" y="24" width="14" height="14" fill="url(#pmc-bar)" rx="3"/>
+  <text x="840" y="36" fill="#636e72" font-size="12">With PMC</text>
+
+  <!-- Savings callout -->
+  <rect x="155" y="450" width="40" height="18" fill="#00b894" rx="9" opacity="0.15"/>
+  <text x="175" y="462" text-anchor="middle" fill="#00b894" font-size="9" font-weight="bold">96.5%</text>
+
+  <rect x="365" y="450" width="40" height="18" fill="#00b894" rx="9" opacity="0.15"/>
+  <text x="385" y="462" text-anchor="middle" fill="#00b894" font-size="9" font-weight="bold">96.1%</text>
+
+  <rect x="575" y="450" width="40" height="18" fill="#00b894" rx="9" opacity="0.15"/>
+  <text x="595" y="462" text-anchor="middle" fill="#00b894" font-size="9" font-weight="bold">96.2%</text>
+
+  <rect x="775" y="450" width="40" height="18" fill="#00b894" rx="9" opacity="0.15"/>
+  <text x="795" y="462" text-anchor="middle" fill="#00b894" font-size="9" font-weight="bold">96.3%</text>
+</svg>

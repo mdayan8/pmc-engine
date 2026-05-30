@@ -37,3 +37,7 @@ node_modules/
 *.db
 *.sqlite
 *.log
+
+# Codebase copies (used for testing)
+fastapi-codebase*/
+fastapi-codebase/
